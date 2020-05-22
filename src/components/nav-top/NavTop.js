@@ -1,24 +1,34 @@
 import React from 'react'
-import { AppBar, Toolbar, IconButton, Typography, makeStyles, Button, Drawer } from '@material-ui/core'
+import { AppBar, Toolbar, IconButton, Typography, makeStyles, Drawer } from '@material-ui/core'
 import MenuIcon from '@material-ui/icons/Menu';
 import BackButton from './back-button/BackButton';
-import { Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 import './NavTop.css'
 
 const NavTop = (props) => {
-    
-    const classes = styles();
 
     const [state, setState] = React.useState({
         open: false
     });
+
+    const history = useHistory()
+
+    const classes = styles();
 
     const toggleDrawer = (open) => event => {
         if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
             return;
         }
         setState({ ...state, open: open });
+    }
+
+
+    function logOut() {
+        localStorage.removeItem('token')
+        localStorage.removeItem('isAdmin')
+
+        history.push('/')
     }
 
     return (
@@ -46,7 +56,7 @@ const NavTop = (props) => {
 
             <Drawer anchor="right" open={state.open} onClose={toggleDrawer(false)}>
                 <div className="side-menu">
-                    <Typography  variant="h6"><Link to="/" className="side-menu-link">Sair</Link></Typography>
+                    <Typography onClick={logOut} variant="h6">Sair</Typography>
                 </div>
             </Drawer>
         </>

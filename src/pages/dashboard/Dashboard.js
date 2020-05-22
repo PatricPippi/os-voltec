@@ -1,100 +1,94 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import NavTop from '../../components/nav-top/NavTop'
-import NavTab from '../../components/nav-bottom/NavTab'
 import OsCard from '../../components/os-card/OsCard'
-import { Grid, Container, makeStyles, ListItem, List} from '@material-ui/core'
-import InfiniteScroll from 'react-infinite-scroller';
+import { Grid, Container, List, BottomNavigation, BottomNavigationAction, withStyles} from '@material-ui/core'
+import { Assignment, AssignmentTurnedIn, AssignmentLate } from '@material-ui/icons';
 import ScrollView from '../../components/scroll-view/ScrollView'
+import api from '../../services/api'
 
 
-function Dashboard() {
+function Dashboard({classes}) {
 
-    const orders = [
-        {
-            id: 1,
-            order: 7855,
-            status: "inProgress",
-            type: "Obra",
-            name: "Gelita do Brasil",
-            description: "Troca de capacitores avariados",
-            date: "20/02/2020 as 12:00h"
+    const token = localStorage.getItem('token')
 
-        },
-       {
-            id: 2,
-            order: 7855,
-            status: "inProgress",
-            type: "Obra",
-            name: "Gelita do Brasil",
-            description: "Troca de capacitores avariados",
-            date: "20/02/2020 as 12:00h"
+    const [value, setValue] = React.useState(0);
+    const [orders, setOrders] = useState([])
+    const [page, setPage] = useState(1)
+    const [loading, setLoading] = useState(false)
+    const [status, setStatus] = useState('active')
 
-        },
-        {
-            id: 3,
-            order: 7855,
-            status: "inProgress",
-            type: "Obra",
-            name: "Gelita do Brasil",
-            description: "Troca de capacitores avariados",
-            date: "20/02/2020 as 12:00h"
+    useEffect(() => {
+        loadOrders()
+    }, [])
 
-        },
-        {
-            id: 4,
-            order: 7855,
-            status: "complete",
-            type: "Obra",
-            name: "Gelita do Brasil",
-            description: "Troca de capacitores avariados",
-            date: "20/02/2020 as 12:00h"
+    async function loadOrders() {
 
-        },
-        {
-            id: 5,
-            order: 7855,
-            status: "",
-            type: "Obra",
-            name: "Gelita do Brasil",
-            description: "Troca de capacitores avariados",
-            date: "20/02/2020 as 12:00h"
-
+        if (loading) {
+            return;
         }
-    ]
 
-    
+        try {
+            const response = await api.get(`orders/${status}/${page}`, {
+                headers: {
+                    "x-access-token": token
+                }
+            })
 
-    const [state, setState] = React.useState({
+            setOrders([...orders, ...response.data])
 
-    })
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
+    function handleClick(status) {
+        setStatus(status)
+    }
 
     const listItems = orders.map((order) =>
         <li key={order.id}>
             <OsCard 
                 status={order.status}
                 type={order.type}
-                serviceOrder={order.order}
-                name={order.name}
+                serviceOrder={order.serviceOrder}
+                name={order.adress}
                 description={order.description}
-                date={order.date}
             />
         </li>
     )
 
     return (
         <ScrollView height="100">
-            <NavTop title="test" />
-                <Container fluid>
-                    <Grid alignContent="center">
+            <NavTop title={status} />
+                <Container>
+                    <Grid>
                         <List>
-                            {listItems}
+                           {listItems}
                         </List>
                     </Grid>
                 </Container>
-            <NavTab/>
+                <BottomNavigation
+                    value={value}
+                    onChange={(event, newValue) => {
+                        setValue(newValue);
+                    }}
+                    showLabels
+                    className={classes.navTab}
+                >
+                    <BottomNavigationAction label="Ordens Ativas" icon={<Assignment/>} onClick={() => handleClick('active')}/>
+                    <BottomNavigationAction label="Em Andamento" icon={<AssignmentLate/>} onClick={() => handleClick('inprogress')}/>
+                    <BottomNavigationAction label="Concluídas" icon={<AssignmentTurnedIn/>} onClick={() => handleClick('complete')}/>
+                </BottomNavigation>
         </ScrollView>
     )
 }
 
+const styles = {
+    navTab: {
+        position: 'sticky',
+        bottom: 0
+    }
+}
 
-export default Dashboard
+export default withStyles(styles)(Dashboard)

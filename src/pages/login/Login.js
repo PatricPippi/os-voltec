@@ -1,10 +1,52 @@
-import React from 'react'
+import React, { useState } from 'react'
 import "./Login.css"
 import { withStyles } from "@material-ui/core/styles";
 import { Grid, TextField, Button, Paper, Typography} from '@material-ui/core';
-import { Link } from "react-router-dom";
+import api from '../../services/api';
+import { useHistory } from 'react-router-dom';
 
 function Login({classes}) {
+
+    const [ login, setLogin ] = useState('')
+    const [ userPassword, setUserPassword ] = useState('')
+
+    const history = useHistory();
+
+    const token = localStorage.getItem('token')
+
+    if(token) {
+       history.push('/dashboard') 
+       return null
+    }
+    
+
+    async function handleSubmit(event) {
+
+        event.preventDefault()
+
+        const data = {
+            login,
+            userPassword,
+        }
+        
+        try {
+            const response = await api.post('login', data)
+
+            const { token, isAdmin } = response.data
+
+            localStorage.setItem('token', token)
+            localStorage.setItem('isAdmin', isAdmin)
+
+            if (token) {
+                history.push("/dashboard")
+            }
+        
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
     return (
         <div className="loginContainer">
             <Grid
@@ -13,10 +55,11 @@ function Login({classes}) {
                 justify="center"
                 alignItems="center"
             >
-                <Typography variant="h2" className={classes.title}>Login</Typography>
+                <Typography variant="h2" className={classes.title}>Entrar</Typography>
                 <form 
                     noValidate 
                     autoComplete="off"
+                    onSubmit={handleSubmit}
                 >
                     <Paper elevation={3} className={classes.paper}>
                         <Grid
@@ -25,16 +68,26 @@ function Login({classes}) {
                             justify="center"
                             alignItems="center"
                         >
-                            <TextField className={classes.input} color="info" label="Numero do Cartão"/>
-                            <TextField className={classes.input} color="info" label="Senha" type="password"/>
+                            <TextField 
+                                className={classes.input} 
+                                label="Login"
+                                onChange={e => setLogin(e.target.value)}
+                            />
+                            <TextField 
+                                className={classes.input} 
+                                label="Senha" 
+                                type="password"
+                                onChange={e => setUserPassword(e.target.value)}
+                            />
                             <Button 
                                 className={classes.button} 
                                 size="large" 
                                 variant="outlined" 
                                 color="primary" 
                                 disableElevation
+                                type="submit"
                             >
-                                <Link to="/dashboard">Entrar</Link>
+                                <span>Entrar</span>
                             </Button>
                         </Grid>
                     </Paper>
