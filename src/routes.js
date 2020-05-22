@@ -18,7 +18,7 @@ export default function Routes() {
           <Login/>
         </Route>
         <PrivateRoute path="/dashboard" component={Dashboard}/>
-        <PrivateRoute path="/order" component={ServiceOrder}/>
+        <PrivateRoute path="/order/:id" component={ServiceOrder}/>
         <PrivateRoute path="/solicitar" component={Material}/>
       </Switch>
     </Router>

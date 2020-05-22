@@ -59,7 +59,7 @@ function ServiceOrder() {
 
     
     return (
-        <ScrollView height="100">
+        <>
             <NavTop backButton={true}/>
             <Paper className={classes.cardHeader}>
                 <div className="card-header">
@@ -131,7 +131,7 @@ function ServiceOrder() {
                     </ExpansionPanelSummary>
                     <ExpansionPanelDetails>
                         <List>
-                            <ScrollView height="20" padding="2">
+                            <ScrollView height="20" padding="1">
                                 <Typography>Entrada</Typography>
                                 <Typography>Saida</Typography>
                                 <Typography>Entrada</Typography>
@@ -187,7 +187,7 @@ function ServiceOrder() {
                     <EndOrder/>
                 }
             </div>
-        </ScrollView>
+        </>
     )
 }
 

@@ -3,19 +3,18 @@ import { Card, CardContent, CardActions, Typography, makeStyles, Button } from '
 import {ArrowRightAlt} from '@material-ui/icons';
 import { Link } from "react-router-dom";
 
-const OsCard = (props) => {
+const OsCard = ({status, type, name, description, date, serviceOrder}) => {
 
     const classes = styles();
-
 
     return (
         <div className={classes.card}>
             <Card>
                 <CardContent>
                     <div className={classes.cardHeader}>
-                        <Typography variant="h6">{props.serviceOrder}</Typography>
+                        <Typography variant="h6">{serviceOrder}</Typography>
                         {
-                            props.status === "complete" && 
+                            status === "complete" && 
                                 <Typography 
                                     variant="subtitle1"
                                     className={classes.complete}
@@ -24,7 +23,7 @@ const OsCard = (props) => {
                                 </Typography> 
                         }
                         {
-                            props.status === "inProgress" && 
+                            status === "inprogress" && 
                                 <Typography 
                                     variant="subtitle1"
                                     className={classes.inProgress}
@@ -32,11 +31,29 @@ const OsCard = (props) => {
                                     Em Andamento
                                 </Typography>
                         }
-                        <Typography variant="h6">{props.type}</Typography>
+                        {
+                            status === "active" && 
+                                <Typography 
+                                    variant="subtitle1"
+                                    className={classes.complete}
+                                >
+                                    Ativa
+                                </Typography>
+                        }
+                        {
+                            type === 1 && <Typography variant="h6">Obra</Typography>
+                        }
+                        {
+                            type === 2 && <Typography variant="h6">Defeito</Typography>
+                        }
+                        {
+                            type === 3 && <Typography variant="h6">Contrução</Typography>
+                        }
+                        
                     </div>
-                    <Typography variant="subtitle1">{props.name}</Typography>
-                    <Typography variant="subtitle2">{props.description}</Typography>
-                    <Typography variant="caption" color="textSecondary">{props.date}</Typography>
+                    <Typography variant="subtitle1">{name}</Typography>
+                    <Typography variant="subtitle2">{description}</Typography>
+                    <Typography variant="caption" color="textSecondary">{date}</Typography>
                 </CardContent>
                 <CardActions>
                     <div className={classes.cardActions}>

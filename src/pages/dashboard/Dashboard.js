@@ -13,28 +13,29 @@ function Dashboard({classes}) {
 
     const [value, setValue] = React.useState(0);
     const [orders, setOrders] = useState([])
-    const [page, setPage] = useState(1)
-    const [loading, setLoading] = useState(false)
     const [status, setStatus] = useState('active')
+
+    const userId = 1
 
     useEffect(() => {
         loadOrders()
-    }, [])
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'
+        });
+    }, [status])
 
     async function loadOrders() {
 
-        if (loading) {
-            return;
-        }
-
         try {
-            const response = await api.get(`orders/${status}/${page}`, {
+            const response = await api.get(`orders/${userId}/${status}`, {
                 headers: {
                     "x-access-token": token
                 }
             })
 
-            setOrders([...orders, ...response.data])
+            setOrders(response.data)
 
         } catch (error) {
             console.log(error)
@@ -52,36 +53,38 @@ function Dashboard({classes}) {
                 status={order.status}
                 type={order.type}
                 serviceOrder={order.serviceOrder}
-                name={order.adress}
+                name={order.name}
                 description={order.description}
             />
         </li>
     )
 
     return (
-        <ScrollView height="100">
-            <NavTop title={status} />
-                <Container>
-                    <Grid>
-                        <List>
-                           {listItems}
-                        </List>
-                    </Grid>
-                </Container>
-                <BottomNavigation
-                    value={value}
-                    onChange={(event, newValue) => {
-                        setValue(newValue);
-                    }}
-                    showLabels
-                    className={classes.navTab}
-                >
-                    <BottomNavigationAction label="Ordens Ativas" icon={<Assignment/>} onClick={() => handleClick('active')}/>
-                    <BottomNavigationAction label="Em Andamento" icon={<AssignmentLate/>} onClick={() => handleClick('inprogress')}/>
-                    <BottomNavigationAction label="Concluídas" icon={<AssignmentTurnedIn/>} onClick={() => handleClick('complete')}/>
-                </BottomNavigation>
-        </ScrollView>
+        <>
+        <NavTop title={"Ordens de serviço"} />
+            <Container>
+                <Grid>
+                    <List>
+                        {listItems}
+                    </List>
+                </Grid>
+            </Container>
+            <BottomNavigation
+                value={value}
+                onChange={(event, newValue) => {
+                    setValue(newValue);
+                }}
+                showLabels
+                className={classes.navTab}
+            >
+                <BottomNavigationAction label="Ordens Ativas" icon={<Assignment/>} onClick={() => handleClick('active')}/>
+                <BottomNavigationAction label="Em Andamento" icon={<AssignmentLate/>} onClick={() => handleClick('inprogress')}/>
+                <BottomNavigationAction label="Concluídas" icon={<AssignmentTurnedIn/>} onClick={() => handleClick('complete')}/>
+    
+        </BottomNavigation>
+        </>
     )
+
 }
 
 const styles = {
