@@ -55,6 +55,7 @@ function Dashboard({classes}) {
                 serviceOrder={order.serviceOrder}
                 name={order.name}
                 description={order.description}
+                id={order.id}
             />
         </li>
     )

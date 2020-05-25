@@ -3,7 +3,7 @@ import { Card, CardContent, CardActions, Typography, makeStyles, Button } from '
 import {ArrowRightAlt} from '@material-ui/icons';
 import { Link } from "react-router-dom";
 
-const OsCard = ({status, type, name, description, date, serviceOrder}) => {
+const OsCard = ({status, type, name, description, date, serviceOrder, id}) => {
 
     const classes = styles();
 
@@ -58,7 +58,7 @@ const OsCard = ({status, type, name, description, date, serviceOrder}) => {
                 <CardActions>
                     <div className={classes.cardActions}>
                         <Button color="primary">
-                            <Link to="/order">Abrir ordem</Link>
+                            <Link to={`/order/${id}`}>Abrir ordem</Link>
                             <ArrowRightAlt/>
                         </Button>
                     </div>
