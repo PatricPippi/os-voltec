@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import { Assignment, AssignmentTurnedIn, AssignmentLate } from '@material-ui/icons';
 import {
-  Grid, Container, List, BottomNavigation, BottomNavigationAction, withStyles,
+  Grid, Container, List, BottomNavigation, BottomNavigationAction, withStyles, Typography,
 } from '@material-ui/core';
 import NavTop from '../../components/nav-top/NavTop';
 import OsCard from '../../components/os-card/OsCard';
@@ -19,7 +19,7 @@ function Dashboard({ classes }) {
   const [orders, setOrders] = useState([]);
   const [status, setStatus] = useState('active');
 
-  const userId = 1;
+  const userId = 3333;
 
 
   useEffect(() => {
@@ -57,7 +57,7 @@ function Dashboard({ classes }) {
         type={order.type}
         serviceOrder={order.serviceOrder}
         name={order.name}
-        description={order.description}
+        description={order.service}
         id={order.id}
       />
     </li>
@@ -66,10 +66,10 @@ function Dashboard({ classes }) {
   return (
     <>
       <NavTop title="Ordens de serviço" />
-      <Container>
+      <Container className={classes.container}>
         <Grid>
           <List>
-            {listItems}
+            {orders.length ? listItems : <Typography className={classes.headingFive} variant="h5">Nenhuma Ordem!</Typography>}
           </List>
         </Grid>
       </Container>
@@ -91,9 +91,18 @@ function Dashboard({ classes }) {
 }
 
 const styles = {
+  container: {
+    paddingBottom: '3rem',
+  },
   navTab: {
-    position: 'sticky',
+    position: 'fixed',
     bottom: 0,
+    width: '100vw',
+  },
+  headingFive: {
+    position: 'absolute',
+    top: '30vh',
+    left: '30vw',
   },
 };
 

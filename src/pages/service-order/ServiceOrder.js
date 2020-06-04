@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-filename-extension */
 /* eslint-disable no-console */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Typography,
   Paper,
@@ -39,27 +39,15 @@ function ServiceOrder() {
     color: 'primary',
     text: 'Iniciar',
   });
-  const [time, setTime] = useState({
+  const [timer, setTimer] = useState({
     timeSeconds: '00',
     timeMinutes: '00',
     timeHours: '00',
   });
 
-  const sw = navigator.serviceWorker;
-
-  const stateToServiceWorker = (data) => {
-    if (sw.controller) {
-      sw.controller.postMessage(data);
-    }
-  };
 
   useEffect(() => {
-    stateToServiceWorker({
-      timeSeconds: `0${seconds}`.slice(-2),
-      timeMinutes: `0${minutes}`.slice(-2),
-      timeHours: `0${hours}`.slice(-2),
-    });
-    setTime({
+    setTimer({
       timeSeconds: `0${seconds}`.slice(-2),
       timeMinutes: `0${minutes}`.slice(-2),
       timeHours: `0${hours}`.slice(-2),
@@ -68,41 +56,20 @@ function ServiceOrder() {
 
   const { id } = useParams();
 
-  const userId = 1;
+  const userId = localStorage.getItem('userId');
+
 
   const token = localStorage.getItem('token');
-
-
-  useEffect(() => {
-    if (sw) {
-      window.addEventListener('load', () => {
-        sw.register('./src/serviceWorker.js')
-          .then(() => sw.ready)
-          .then(() => {
-            sw.addEventListener('message', ({ data }) => {
-              if (data !== undefined) {
-                setTime({
-                  timeSeconds: data.timeSeconds,
-                  timeMinutes: data.timeMinutes,
-                  timeHours: data.timeHours,
-                });
-              }
-            });
-          })
-          .catch((error) => {
-            console.log('[SW] Service Worker register error: ', error);
-          });
-      });
-    }
-  }, [setTime, sw]);
 
   async function createResume(type) {
     const data = {
       userId,
       orderId: id,
       type,
-      starts,
+      start: starts,
     };
+
+    console.log(data);
 
     try {
       await api.post('resume', data, {
@@ -110,21 +77,19 @@ function ServiceOrder() {
           'x-access-token': token,
         },
       });
-      console.log('call');
     } catch (error) {
       console.log(error);
-      console.log('calleror');
     }
   }
 
-  async function findResume() {
+  async function getResumes() {
     const resumes = await api.get(`resume/${id}`, {
       headers: {
         'x-access-token': token,
       },
     });
     setResume(resumes.data);
-    console.log('chamada resume');
+    console.log('chamada');
   }
 
   useEffect(() => {
@@ -152,24 +117,20 @@ function ServiceOrder() {
       console.log('chamada ordem');
     }
     orderData();
-  }, []);
-
-
-  useEffect(() => {
-    findResume();
+    getResumes();
   }, []);
 
 
   function handlePause() {
     if (paused === false) {
       createResume(2);
-      findResume();
       setPaused(true);
+      getResumes();
       pause();
     } else {
       createResume(1);
-      findResume();
       setPaused(false);
+      getResumes();
       start();
     }
   }
@@ -188,19 +149,25 @@ function ServiceOrder() {
     </Typography>
   ));
 
+  const endOrder = useCallback(() => {
+    setOpen(true);
+    console.log(starts);
+  }, []);
+
   function handleStart() {
-    if (starts !== true) {
+    if (!starts) {
       setStarts(true);
+      setPaused(false);
       setButton({
         color: 'secondary',
         text: 'Finalizar',
       });
+      start();
       createResume(1);
     } else {
-      setOpen(true);
+      endOrder();
     }
   }
-
 
   return (
     <>
@@ -244,11 +211,11 @@ function ServiceOrder() {
                     <>
                       <div className="status-header">
                         <Typography>
-                          {time.timeHours}
+                          {timer.timeHours}
                           :
-                          {time.timeMinutes}
+                          {timer.timeMinutes}
                           :
-                          {time.timeSeconds}
+                          {timer.timeSeconds}
                         </Typography>
                       </div>
                       <div className="status-button">
@@ -305,28 +272,52 @@ function ServiceOrder() {
           </ExpansionPanelDetails>
         </ExpansionPanel>
         <div className="footer">
-          <Button
-            disableElevation
-            variant="contained"
-            onClick={handleStart}
-            className={classes.margin}
-            color={button.color}
-            size="large"
-          >
-            {button.text}
-          </Button>
-          <Button
-            disableElevation
-            variant="contained"
-            size="large"
-          >
-            <Link to="/solicitar" className="links">Soliciar Material</Link>
-          </Button>
+          {
+          order.status === 'complete' ? (
+            <>
+              <Typography variant="h6">Serviço Realizado:</Typography>
+              <Typography variant="subtitle1" className={classes.margin}>{order.serviceCompleted}</Typography>
+              <Typography variant="h6">Observação:</Typography>
+              <Typography variant="subtitle1" className={classes.margin}>{order.observation}</Typography>
+              <Typography variant="h6">Tempo / Deslocamento</Typography>
+              <Typography variant="subtitle1" className={classes.margin}>
+                Tempo:
+                {' '}
+                {order.time}
+                , Deslocamento:
+                {' '}
+                {order.distance}
+                km
+              </Typography>
+            </>
+          ) : (
+            <>
+              <Button
+                disabled={!paused && starts}
+                disableElevation
+                variant="contained"
+                onClick={handleStart}
+                className={classes.margin}
+                color={button.color}
+                size="large"
+              >
+                {button.text}
+              </Button>
+              <Button
+                disableElevation
+                variant="contained"
+                size="large"
+              >
+                <Link to="/solicitar" className="links">Soliciar Material</Link>
+              </Button>
+              {
+                open === true
+                && <EndOrder time={`${timer.timeHours}:${timer.timeMinutes}:${timer.timeSeconds}`} />
+              }
+            </>
+          )
+          }
         </div>
-        {
-                    open === true
-                    && <EndOrder />
-                }
       </div>
     </>
   );

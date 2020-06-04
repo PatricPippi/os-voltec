@@ -1,3 +1,9 @@
+/* eslint-disable no-console */
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-use-before-define */
+/* eslint-disable comma-dangle */
+/* eslint-disable operator-linebreak */
+/* eslint-disable arrow-parens */
 // This optional code is used to register a service worker.
 // register() is not called by default.
 
@@ -139,16 +145,3 @@ export function unregister() {
       });
   }
 }
-/* eslint-disable linebreak-style */
-/* eslint-disable no-restricted-globals */
-self.addEventListener('install', () => {
-  self.skipWaiting();
-});
-
-self.addEventListener('message', ({ data, source: { id } }) => {
-  self.clients.matchAll().then((clients) => {
-    clients.forEach((client) => {
-      if (client.id !== id) client.postMessage(data);
-    });
-  });
-});
