@@ -15,7 +15,7 @@ import api from '../../services/api';
 function Dashboard({ classes }) {
   const token = localStorage.getItem('token');
 
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = useState(0);
   const [orders, setOrders] = useState([]);
   const [status, setStatus] = useState('active');
 

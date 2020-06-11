@@ -27,6 +27,8 @@ const NavTop = (props) => {
     function logOut() {
         localStorage.removeItem('token')
         localStorage.removeItem('isAdmin')
+        localStorage.removeItem('name');
+        localStorage.removeItem('userId');
 
         history.push('/')
     }

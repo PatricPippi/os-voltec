@@ -1,7 +1,6 @@
-import axios from 'axios'
+import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'https://voltec-backend.herokuapp.com'
+  baseURL: 'https://voltec-backend.herokuapp.com',
 })
-
-export default api
+export default api;

@@ -265,7 +265,7 @@ function ServiceOrder() {
           </ExpansionPanelSummary>
           <ExpansionPanelDetails>
             <List>
-              <ScrollView height="20" padding="1">
+              <ScrollView height="20" paddin g="1">
                 {listResume}
               </ScrollView>
             </List>
