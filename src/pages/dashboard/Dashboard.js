@@ -19,7 +19,7 @@ function Dashboard({ classes }) {
   const [orders, setOrders] = useState([]);
   const [status, setStatus] = useState('active');
 
-  const userId = 3333;
+  const { userId } = localStorage.getItem('userId');
 
 
   useEffect(() => {
