@@ -41,6 +41,8 @@ function Login({ classes }) {
 
       const { userId, name } = jwt.decode(token);
 
+      console.log(userId);
+
       localStorage.setItem('name', name);
       localStorage.setItem('userId', userId);
       localStorage.setItem('token', token);

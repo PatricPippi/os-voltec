@@ -19,7 +19,7 @@ function Dashboard({ classes }) {
   const [orders, setOrders] = useState([]);
   const [status, setStatus] = useState('active');
 
-  const { userId } = localStorage.getItem('userId');
+  const userId = localStorage.getItem('userId');
 
 
   useEffect(() => {
@@ -50,15 +50,24 @@ function Dashboard({ classes }) {
     setStatus(stat);
   }
 
+  const options = {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour12: false,
+    timeZone: 'America/Sao_Paulo',
+  };
+
   const listItems = orders.map((order) => (
     <li key={order.id}>
       <OsCard
         status={order.status}
         type={order.type}
         serviceOrder={order.serviceOrder}
-        name={order.name}
+        name={order.clientName}
         description={order.service}
         id={order.id}
+        date={new Intl.DateTimeFormat('pt-BR', options).format(order.serviceDate)}
       />
     </li>
   ));

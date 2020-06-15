@@ -30,6 +30,7 @@ function ServiceOrder() {
   } = useStopwatch();
 
 
+  const [cars, setCars] = useState([]);
   const [starts, setStarts] = useState(false);
   const [paused, setPaused] = useState(false);
   const [open, setOpen] = useState(false);
@@ -69,7 +70,6 @@ function ServiceOrder() {
       start: starts,
     };
 
-    console.log(data);
 
     try {
       await api.post('resume', data, {
@@ -89,7 +89,6 @@ function ServiceOrder() {
       },
     });
     setResume(resumes.data);
-    console.log('chamada');
   }
 
   useEffect(() => {
@@ -108,18 +107,31 @@ function ServiceOrder() {
             color: 'secondary',
             text: 'Finalizar',
           });
-          console.log('chamada status');
           setPaused(true);
         }
       } catch (error) {
         console.log(error);
       }
-      console.log('chamada ordem');
     }
     orderData();
-    getResumes();
   }, []);
 
+  useEffect(() => {
+    async function loadCars() {
+      try {
+        const response = await api.get(`cars/${order.serviceOrder}/${userId}`, {
+          headers: {
+            'x-access-token': token,
+          },
+        });
+
+        setCars(response.data);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    loadCars();
+  }, [order.serviceOrder, token, userId]);
 
   function handlePause() {
     if (paused === false) {
@@ -137,6 +149,16 @@ function ServiceOrder() {
 
   // eslint-disable-next-line no-use-before-define
   const classes = styles();
+
+  const listCars = cars.map((car) => (
+    <Typography key={car.carId} variant="subtitle1">
+      {car.carName}
+      {' '}
+      -
+      {' '}
+      {car.carNumber}
+    </Typography>
+  ));
 
 
   const listResume = resume.map((resum) => (
@@ -184,7 +206,7 @@ function ServiceOrder() {
           </Typography>
         </div>
         <div className="card-content">
-          <Typography variant="h5">{order.name}</Typography>
+          <Typography variant="h5">{order.clientName}</Typography>
           <Typography variant="h6">{order.phoneNumber}</Typography>
           <Typography>
             {order.city}
@@ -247,19 +269,14 @@ function ServiceOrder() {
         <Typography variant="subtitle1" className={classes.margin}>{order.service}</Typography>
         <Typography variant="h6">Descrição:</Typography>
         <Typography variant="subtitle1" className={classes.margin}>{order.description}</Typography>
-        <Typography variant="h6">Veículo</Typography>
-        <Typography variant="subtitle1">
-          {order.carName}
-          {' '}
-          -
-          {' '}
-          {order.carNumber}
-        </Typography>
+        <Typography variant="h6">Veículos</Typography>
+        {listCars}
         <ExpansionPanel>
           <ExpansionPanelSummary
             expandIcon={<ExpandMoreIcon />}
             aria-controls="panel1a-content"
             id="panel1a-header"
+            onClick={getResumes}
           >
             <Typography>Resumo</Typography>
           </ExpansionPanelSummary>
