@@ -7,6 +7,8 @@ import { Assignment, AssignmentTurnedIn, AssignmentLate } from '@material-ui/ico
 import {
   Grid, Container, List, BottomNavigation, BottomNavigationAction, withStyles, Typography,
 } from '@material-ui/core';
+import ReactPullToRefresh from 'react-pull-to-refresh';
+import Spinner from '../../components/spinner/Spinner';
 import NavTop from '../../components/nav-top/NavTop';
 import OsCard from '../../components/os-card/OsCard';
 import api from '../../services/api';
@@ -18,32 +20,35 @@ function Dashboard({ classes }) {
   const [value, setValue] = useState(0);
   const [orders, setOrders] = useState([]);
   const [status, setStatus] = useState('active');
+  const [loading, setLoading] = useState(false);
 
   const userId = localStorage.getItem('userId');
 
+  async function loadOrders() {
+    setLoading(true);
+    try {
+      const response = await api.get(`orders/${userId}/${status}`, {
+        headers: {
+          'x-access-token': token,
+        },
+      });
+
+      setOrders(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function loadOrders() {
-      try {
-        const response = await api.get(`orders/${userId}/${status}`, {
-          headers: {
-            'x-access-token': token,
-          },
-        });
-
-        setOrders(response.data);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
     loadOrders();
     window.scrollTo({
       top: 0,
       left: 0,
       behavior: 'smooth',
     });
-  }, [status, token]);
+  }, [status, token, userId]);
 
 
   function handleClick(stat) {
@@ -54,12 +59,16 @@ function Dashboard({ classes }) {
     year: 'numeric',
     month: 'numeric',
     day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
     hour12: false,
     timeZone: 'America/Sao_Paulo',
   };
 
   const listItems = orders.map((order) => (
     <li key={order.id}>
+      {console.log(order.serviceDate)}
       <OsCard
         status={order.status}
         type={order.type}
@@ -67,34 +76,46 @@ function Dashboard({ classes }) {
         name={order.clientName}
         description={order.service}
         id={order.id}
-        date={new Intl.DateTimeFormat('pt-BR', options).format(order.serviceDate)}
+        date={new Intl.DateTimeFormat('pt-BR', options).format()}
       />
     </li>
   ));
 
   return (
-    <>
-      <NavTop title="Ordens de serviço" />
-      <Container className={classes.container}>
-        <Grid>
-          <List>
-            {orders.length ? listItems : <Typography className={classes.headingFive} variant="h5">Nenhuma Ordem!</Typography>}
-          </List>
-        </Grid>
-      </Container>
-      <BottomNavigation
-        value={value}
-        onChange={(event, newValue) => {
-          setValue(newValue);
-        }}
-        showLabels
-        className={classes.navTab}
-      >
-        <BottomNavigationAction label="Ordens Ativas" icon={<Assignment />} onClick={() => handleClick('active')} />
-        <BottomNavigationAction label="Em Andamento" icon={<AssignmentLate />} onClick={() => handleClick('inprogress')} />
-        <BottomNavigationAction label="Concluídas" icon={<AssignmentTurnedIn />} onClick={() => handleClick('complete')} />
 
-      </BottomNavigation>
+    <>
+      <ReactPullToRefresh
+        distanceToRefresh="10"
+        onRefresh={loadOrders}
+        style={{
+          textAlign: 'center',
+        }}
+      >
+        <NavTop title="Ordens de serviço" />
+        <Container className={classes.container}>
+          <Grid>
+            <List>
+              {orders.length ? listItems : <Typography className={classes.headingFive} variant="h5">Nenhuma Ordem!</Typography>}
+            </List>
+          </Grid>
+        </Container>
+        <BottomNavigation
+          value={value}
+          onChange={(event, newValue) => {
+            setValue(newValue);
+          }}
+          showLabels
+          className={classes.navTab}
+        >
+          <BottomNavigationAction label="Ordens Ativas" icon={<Assignment />} onClick={() => handleClick('active')} />
+          <BottomNavigationAction label="Em Andamento" icon={<AssignmentLate />} onClick={() => handleClick('inprogress')} />
+          <BottomNavigationAction label="Concluídas" icon={<AssignmentTurnedIn />} onClick={() => handleClick('complete')} />
+
+        </BottomNavigation>
+      </ReactPullToRefresh>
+      {
+        loading && <Spinner delay="100" />
+      }
     </>
   );
 }
