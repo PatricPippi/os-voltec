@@ -7,6 +7,7 @@ import { Assignment, AssignmentTurnedIn, AssignmentLate } from '@material-ui/ico
 import {
   Grid, Container, List, BottomNavigation, BottomNavigationAction, withStyles, Typography,
 } from '@material-ui/core';
+import { utcToZonedTime, format } from 'date-fns';
 import ReactPullToRefresh from 'react-pull-to-refresh';
 import Spinner from '../../components/spinner/Spinner';
 import NavTop from '../../components/nav-top/NavTop';
@@ -66,6 +67,14 @@ function Dashboard({ classes }) {
     timeZone: 'America/Sao_Paulo',
   };
 
+  function formatDate(date) {
+    const timeZone = 'Europe/Berlin';
+    const zonedDate = utcToZonedTime(date, timeZone);
+    const pattern = 'd.m.yyyy HH:mm:ss.SSS GMT XXX (z)';
+    const output = format(zonedDate, pattern, { timeZone: 'America/Sao_Paulo' });
+    return output;
+  }
+
   const listItems = orders.map((order) => (
     <li key={order.id}>
       {console.log(order.serviceDate)}
@@ -76,7 +85,7 @@ function Dashboard({ classes }) {
         name={order.clientName}
         description={order.service}
         id={order.id}
-        date={new Intl.DateTimeFormat('pt-BR', options).format()}
+        date={formatDate(order.data)}
       />
     </li>
   ));
