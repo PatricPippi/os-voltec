@@ -7,7 +7,7 @@ import { Assignment, AssignmentTurnedIn, AssignmentLate } from '@material-ui/ico
 import {
   Grid, Container, List, BottomNavigation, BottomNavigationAction, withStyles, Typography,
 } from '@material-ui/core';
-import { utcToZonedTime, format } from 'date-fns';
+import { utcToZonedTime, format } from 'date-fns/';
 import ReactPullToRefresh from 'react-pull-to-refresh';
 import Spinner from '../../components/spinner/Spinner';
 import NavTop from '../../components/nav-top/NavTop';
