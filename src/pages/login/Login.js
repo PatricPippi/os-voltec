@@ -4,8 +4,9 @@ import React, { useState } from 'react';
 import './Login.css';
 import { withStyles } from '@material-ui/core/styles';
 import {
-  Grid, TextField, Button, Paper, Typography,
+  Grid, TextField, Button, Paper, Typography, Snackbar,
 } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
 import { useHistory } from 'react-router-dom';
 import api from '../../services/api';
 
@@ -14,13 +15,14 @@ const jwt = require('jsonwebtoken');
 function Login({ classes }) {
   const [login, setLogin] = useState('');
   const [userPassword, setUserPassword] = useState('');
+  const [openError, setOpenError] = useState(false);
 
   const history = useHistory();
 
-  const token = localStorage.getItem('token');
+  const tokenStoraged = localStorage.getItem('token');
 
 
-  if (token) {
+  if (tokenStoraged) {
     history.push('/dashboard');
     return null;
   }
@@ -41,8 +43,6 @@ function Login({ classes }) {
 
       const { userId, name } = jwt.decode(token);
 
-      console.log(userId);
-
       localStorage.setItem('name', name);
       localStorage.setItem('userId', userId);
       localStorage.setItem('token', token);
@@ -50,60 +50,82 @@ function Login({ classes }) {
 
       if (token) {
         history.push('/dashboard');
+      } else {
+        setOpenError(true);
       }
     } catch (error) {
-      console.log(error);
+      setOpenError(true);
     }
   }
 
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpenError(false);
+  };
 
   return (
-    <div className="loginContainer">
-      <Grid
-        container
-        direction="column"
-        justify="center"
-        alignItems="center"
-      >
-        <Typography variant="h2" className={classes.title}>Entrar</Typography>
-        <form
-          noValidate
-          autoComplete="off"
-          onSubmit={handleSubmit}
+    <>
+      <div className="loginContainer">
+        <Grid
+          container
+          direction="column"
+          justify="center"
+          alignItems="center"
         >
-          <Paper elevation={3} className={classes.paper}>
-            <Grid
-              container
-              direction="column"
-              justify="center"
-              alignItems="center"
-            >
-              <TextField
-                className={classes.input}
-                label="Login"
-                onChange={(e) => setLogin(e.target.value)}
-              />
-              <TextField
-                className={classes.input}
-                label="Senha"
-                type="password"
-                onChange={(e) => setUserPassword(e.target.value)}
-              />
-              <Button
-                className={classes.button}
-                size="large"
-                variant="outlined"
-                color="primary"
-                disableElevation
-                type="submit"
+          <Typography variant="h2" className={classes.title}>Entrar</Typography>
+          <form
+            noValidate
+            autoComplete="off"
+            onSubmit={handleSubmit}
+          >
+            <Paper elevation={3} className={classes.paper}>
+              <Grid
+                container
+                direction="column"
+                justify="center"
+                alignItems="center"
               >
-                <span>Entrar</span>
-              </Button>
-            </Grid>
-          </Paper>
-        </form>
-      </Grid>
-    </div>
+                <TextField
+                  className={classes.input}
+                  label="Login"
+                  onChange={(e) => setLogin(e.target.value)}
+                />
+                <TextField
+                  className={classes.input}
+                  label="Senha"
+                  type="password"
+                  onChange={(e) => setUserPassword(e.target.value)}
+                />
+                <Button
+                  className={classes.button}
+                  size="large"
+                  variant="outlined"
+                  color="primary"
+                  disableElevation
+                  type="submit"
+                >
+                  <span>Entrar</span>
+                </Button>
+              </Grid>
+            </Paper>
+          </form>
+        </Grid>
+
+      </div>
+      <Snackbar
+        open={openError}
+        autoHideDuration={3000}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert variant="filled" severity="error" onClose={handleClose}>
+          Login e/ou senha inválido!
+        </Alert>
+      </Snackbar>
+    </>
   );
 }
 
