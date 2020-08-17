@@ -1,0 +1,9 @@
+.schedule {
+    display: flex;
+    flex: 1;
+    padding: 20px;
+    flex-direction: column;
+}
+.schedule-content {
+    margin-top: 10px;
+}

@@ -271,6 +271,10 @@ function ServiceOrder() {
         <Typography variant="subtitle1" className={classes.margin}>{order.description}</Typography>
         <Typography variant="h6">Veículos</Typography>
         {listCars}
+        <Typography variant="h6">Funcionários</Typography>
+        <Typography variant="subtitle1">Anderson</Typography>
+        <Typography variant="subtitle1">Elias</Typography>
+        <Typography variant="subtitle1">Gabriel</Typography>
         <ExpansionPanel>
           <ExpansionPanelSummary
             expandIcon={<ExpandMoreIcon />}

@@ -10,11 +10,12 @@
 }
 .content {
     background-color: white;
-    height: 100vh;
+    height: auto;
     width: auto;
     padding-top: 8rem;
     padding-left: 2rem;
     padding-right: 2rem;
+    padding-bottom: 2rem;
 }
 .content-header {
     background-color: #d3d3d3;
