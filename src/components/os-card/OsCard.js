@@ -9,7 +9,7 @@ const OsCard = ({status, type, name, description, date, serviceOrder, id}) => {
 
     return (
         <div className={classes.card}>
-            <Card>
+            <Card elevation={0}>
                 <CardContent>
                     <div className={classes.cardHeader}>
                         <Typography variant="h6">{serviceOrder}</Typography>

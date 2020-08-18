@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 /* eslint-disable react/jsx-filename-extension */
 /* eslint-disable no-console */
 import React, { useState, useEffect, useCallback } from 'react';
@@ -15,6 +16,8 @@ import { useStopwatch } from 'react-timer-hook';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import './ServiceOrder.css';
 import { Link, useParams } from 'react-router-dom';
+import Moment from 'react-moment';
+import 'moment/locale/pt-br';
 import ScrollView from '../../components/scroll-view/ScrollView';
 import EndOrder from '../end-order/EndOrder';
 import NavTop from '../../components/nav-top/NavTop';
@@ -30,6 +33,8 @@ function ServiceOrder() {
   } = useStopwatch();
 
 
+  const [waze, setWaze] = useState('');
+  const [users, setUsers] = useState([]);
   const [cars, setCars] = useState([]);
   const [starts, setStarts] = useState(false);
   const [paused, setPaused] = useState(false);
@@ -117,6 +122,19 @@ function ServiceOrder() {
   }, []);
 
   useEffect(() => {
+    async function loadUsers() {
+      try {
+        const response = await api.get(`schedule/users/${order.serviceOrder}`, {
+          headers: {
+            'x-access-token': token,
+          },
+        });
+        setUsers(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
     async function loadCars() {
       try {
         const response = await api.get(`cars/${order.serviceOrder}/${userId}`, {
@@ -131,6 +149,7 @@ function ServiceOrder() {
       }
     }
     loadCars();
+    loadUsers();
   }, [order.serviceOrder, token, userId]);
 
   function handlePause() {
@@ -167,7 +186,7 @@ function ServiceOrder() {
       {' '}
       -
       {' '}
-      {resum.created_at}
+      <Moment format="LLL" locale="pt-br">{resum.created_at}</Moment>
     </Typography>
   ));
 
@@ -191,6 +210,21 @@ function ServiceOrder() {
     }
   }
 
+  function handleWaze(e) {
+    e.preventDefault();
+
+    const adress = `${order.adress} ${order.district} ${order.city}`;
+    const link = adress
+      .replace(/[^a-zA-Z0-9s]/g, ' ')
+      .toLowerCase()
+      .split(' ')
+      .filter((links) => {
+        return links !== '';
+      })
+      .join('%20');
+
+    window.open(`https://waze.com/ul?q=${link}&navigate=yes`);
+  }
   return (
     <>
       <NavTop backButton />
@@ -221,7 +255,7 @@ function ServiceOrder() {
             {' '}
             {order.district}
           </Typography>
-          <Button color="primary" href="https://waze.com/ul?ll=-29.7023078,-51.1271811&z=10&navigate=yes">
+          <Button color="primary" onClick={(e) => handleWaze(e)}>
             Abrir no Waze
           </Button>
         </div>
@@ -272,9 +306,11 @@ function ServiceOrder() {
         <Typography variant="h6">Veículos</Typography>
         {listCars}
         <Typography variant="h6">Funcionários</Typography>
-        <Typography variant="subtitle1">Anderson</Typography>
-        <Typography variant="subtitle1">Elias</Typography>
-        <Typography variant="subtitle1">Gabriel</Typography>
+        {
+          users.map((user, i) => (
+            <Typography variant="subtitle1" key={i}>{user.name}</Typography>
+          ))
+        }
         <ExpansionPanel>
           <ExpansionPanelSummary
             expandIcon={<ExpandMoreIcon />}

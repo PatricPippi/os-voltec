@@ -1,14 +1,9 @@
-html {
+html, body {
     height: 100%;
     width: 100%;
     font-family: 'Roboto';
-    background-color: #e2e2e2;
-}
-
-body {
-    background-color: #e2e2e2;
-    height: 100%;
-    width: 100%;
+    background-color: #f0f0f0;
+    box-sizing: border-box;
 }
 
 a {

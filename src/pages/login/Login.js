@@ -52,9 +52,13 @@ function Login({ classes }) {
         history.push('/dashboard');
       } else {
         setOpenError(true);
+        setUserPassword('');
+        setLogin('');
       }
     } catch (error) {
       setOpenError(true);
+      setUserPassword('');
+      setLogin('');
     }
   }
 
@@ -91,12 +95,14 @@ function Login({ classes }) {
                 <TextField
                   className={classes.input}
                   label="Login"
+                  value={login}
                   onChange={(e) => setLogin(e.target.value)}
                 />
                 <TextField
                   className={classes.input}
                   label="Senha"
                   type="password"
+                  value={userPassword}
                   onChange={(e) => setUserPassword(e.target.value)}
                 />
                 <Button

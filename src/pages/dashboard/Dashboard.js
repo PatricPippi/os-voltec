@@ -25,6 +25,7 @@ function Dashboard({ classes }) {
   const userId = localStorage.getItem('userId');
 
   async function loadOrders() {
+    console.log('chamado');
     setLoading(true);
     try {
       const response = await api.get(`orders/${userId}/${status}`, {
@@ -57,7 +58,6 @@ function Dashboard({ classes }) {
 
   const listItems = orders.map((order) => (
     <li key={order.id}>
-      {console.log(order.serviceDate)}
       <OsCard
         status={order.status}
         type={order.type}
@@ -65,43 +65,41 @@ function Dashboard({ classes }) {
         name={order.clientName}
         description={order.service}
         id={order.id}
-        date={order.data}
+        date={order.serviceDate.split(' ')[0]}
       />
     </li>
   ));
 
+  useEffect(() => {
+    if (document.body.scrollTop) {
+      loadOrders();
+    }
+  }, []);
+
+
   return (
-
     <>
-      <ReactPullToRefresh
-        distanceToRefresh="10"
-        onRefresh={loadOrders}
-        style={{
-          textAlign: 'center',
+      <NavTop title="Ordens de serviço" />
+      <Container className={classes.container}>
+        <Grid>
+          <List>
+            {orders.length ? listItems : <Typography className={classes.headingFive} variant="h5">Nenhuma Ordem!</Typography>}
+          </List>
+        </Grid>
+      </Container>
+      <BottomNavigation
+        value={value}
+        onChange={(event, newValue) => {
+          setValue(newValue);
         }}
+        showLabels
+        className={classes.navTab}
       >
-        <NavTop title="Ordens de serviço" />
-        <Container className={classes.container}>
-          <Grid>
-            <List>
-              {orders.length ? listItems : <Typography className={classes.headingFive} variant="h5">Nenhuma Ordem!</Typography>}
-            </List>
-          </Grid>
-        </Container>
-        <BottomNavigation
-          value={value}
-          onChange={(event, newValue) => {
-            setValue(newValue);
-          }}
-          showLabels
-          className={classes.navTab}
-        >
-          <BottomNavigationAction label="Ordens Ativas" icon={<Assignment />} onClick={() => handleClick('active')} />
-          <BottomNavigationAction label="Em Andamento" icon={<AssignmentLate />} onClick={() => handleClick('inprogress')} />
-          <BottomNavigationAction label="Concluídas" icon={<AssignmentTurnedIn />} onClick={() => handleClick('complete')} />
+        <BottomNavigationAction label="Ordens Ativas" icon={<Assignment />} onClick={() => handleClick('active')} />
+        <BottomNavigationAction label="Em Andamento" icon={<AssignmentLate />} onClick={() => handleClick('inprogress')} />
+        <BottomNavigationAction label="Concluídas" icon={<AssignmentTurnedIn />} onClick={() => handleClick('complete')} />
 
-        </BottomNavigation>
-      </ReactPullToRefresh>
+      </BottomNavigation>
       {
         loading && <Spinner delay="100" />
       }
