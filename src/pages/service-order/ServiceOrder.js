@@ -33,7 +33,6 @@ function ServiceOrder() {
   } = useStopwatch();
 
 
-  const [waze, setWaze] = useState('');
   const [users, setUsers] = useState([]);
   const [cars, setCars] = useState([]);
   const [starts, setStarts] = useState(false);
@@ -106,6 +105,8 @@ function ServiceOrder() {
         });
         setOrder(response.data);
 
+        console.log(response.data);
+
         if (response.data.status === 'inprogress') {
           setStarts(true);
           setButton({
@@ -119,7 +120,7 @@ function ServiceOrder() {
       }
     }
     orderData();
-  }, []);
+  }, [id, token]);
 
   useEffect(() => {
     async function loadUsers() {
@@ -130,6 +131,7 @@ function ServiceOrder() {
           },
         });
         setUsers(response.data);
+        console.log(response);
       } catch (error) {
         console.error(error);
       }
@@ -144,13 +146,16 @@ function ServiceOrder() {
         });
 
         setCars(response.data);
+        console.log(response);
       } catch (error) {
         console.log(error);
       }
     }
-    loadCars();
-    loadUsers();
-  }, [order.serviceOrder, token, userId]);
+    if (order) {
+      loadCars();
+      loadUsers();
+    }
+  }, [order, order.serviceOrder, token, userId]);
 
   function handlePause() {
     if (paused === false) {
@@ -192,7 +197,6 @@ function ServiceOrder() {
 
   const endOrder = useCallback(() => {
     setOpen(true);
-    console.log(starts);
   }, []);
 
   function handleStart() {
@@ -218,9 +222,7 @@ function ServiceOrder() {
       .replace(/[^a-zA-Z0-9s]/g, ' ')
       .toLowerCase()
       .split(' ')
-      .filter((links) => {
-        return links !== '';
-      })
+      .filter((links) => links !== '')
       .join('%20');
 
     window.open(`https://waze.com/ul?q=${link}&navigate=yes`);
@@ -308,7 +310,7 @@ function ServiceOrder() {
         <Typography variant="h6">Funcionários</Typography>
         {
           users.map((user, i) => (
-            <Typography variant="subtitle1" key={i}>{user.name}</Typography>
+            <Typography variant="subtitle1" key={i}>{ user ? user.name : '' }</Typography>
           ))
         }
         <ExpansionPanel>

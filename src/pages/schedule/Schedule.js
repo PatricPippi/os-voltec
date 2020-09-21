@@ -47,7 +47,7 @@ function Schedule() {
       }
     }
     loadSchedules();
-  }, [userId]);
+  }, [token, userId]);
 
 
   const listSchedule = schedule.map((schedule) => (

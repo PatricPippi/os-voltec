@@ -2,12 +2,11 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/jsx-filename-extension */
 /* eslint-disable implicit-arrow-linebreak */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Assignment, AssignmentTurnedIn, AssignmentLate } from '@material-ui/icons';
 import {
   Grid, Container, List, BottomNavigation, BottomNavigationAction, withStyles, Typography,
 } from '@material-ui/core';
-import ReactPullToRefresh from 'react-pull-to-refresh';
 import Spinner from '../../components/spinner/Spinner';
 import NavTop from '../../components/nav-top/NavTop';
 import OsCard from '../../components/os-card/OsCard';
@@ -23,14 +22,21 @@ function Dashboard({ classes }) {
   const [loading, setLoading] = useState(false);
 
   const userId = localStorage.getItem('userId');
+  const isAdmin = localStorage.getItem('isAdmin');
 
-  async function loadOrders() {
+
+  const loadOrders = useCallback(async () => {
     console.log('chamado');
     setLoading(true);
     try {
-      const response = await api.get(`orders/${userId}/${status}`, {
+      const response = await api.get('orders', {
         headers: {
           'x-access-token': token,
+        },
+        params: {
+          userId,
+          status,
+          isAdmin,
         },
       });
 
@@ -40,7 +46,7 @@ function Dashboard({ classes }) {
       console.error(error);
       setLoading(false);
     }
-  }
+  }, [isAdmin, status, token, userId]);
 
   useEffect(() => {
     loadOrders();
@@ -49,7 +55,7 @@ function Dashboard({ classes }) {
       left: 0,
       behavior: 'smooth',
     });
-  }, [status, token, userId]);
+  }, [loadOrders, status, token, userId]);
 
 
   function handleClick(stat) {
@@ -69,13 +75,6 @@ function Dashboard({ classes }) {
       />
     </li>
   ));
-
-  useEffect(() => {
-    if (document.body.scrollTop) {
-      loadOrders();
-    }
-  }, []);
-
 
   return (
     <>
