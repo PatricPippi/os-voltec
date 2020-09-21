@@ -68,10 +68,11 @@ function Dashboard({ classes }) {
         status={order.status}
         type={order.type}
         serviceOrder={order.serviceOrder}
-        name={order.clientName}
+        clientName={order.clientName}
+        userName={'Patric'}
         description={order.service}
         id={order.id}
-        date={order.serviceDate.split(' ')[0]}
+        date={`${order.serviceDate.split(' ')[0]} ás ${order.serviceTime}`}
       />
     </li>
   ));
