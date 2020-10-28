@@ -40,14 +40,21 @@ const OsCard = ({status, type, clientName, description, date, serviceOrder, id, 
                                     Ativa
                                 </Typography>
                         }
+                         
+                        {
+                            type === 0 && <Typography variant="h6">Extra Contrato</Typography>
+                        }
                         {
                             type === 1 && <Typography variant="h6">Obra</Typography>
                         }
                         {
-                            type === 2 && <Typography variant="h6">Defeito</Typography>
+                            type === 2 && <Typography variant="h6">Garantia</Typography>
                         }
                         {
-                            type === 3 && <Typography variant="h6">Contrução</Typography>
+                            type === 3 && <Typography variant="h6">Manutenção</Typography>
+                        }
+                        {
+                            type === 4 && <Typography variant="h6">Emergencial</Typography>
                         }
                         
                     </div>

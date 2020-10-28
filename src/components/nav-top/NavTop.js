@@ -5,13 +5,14 @@ import {
   AppBar, Toolbar, IconButton, Typography, makeStyles, Drawer, MenuItem, MenuList, ListItemIcon,
 } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
+import LoopIcon from '@material-ui/icons/Loop';
 import CalendarToday from '@material-ui/icons/CalendarToday';
 import { useHistory } from 'react-router-dom';
 import BackButton from './back-button/BackButton';
 
 import './NavTop.css';
 
-function NavTop({ backButton, title }) {
+function NavTop({ backButton, title, refreshButton, onRefresh }) {
   const [state, setState] = React.useState({
     open: false,
   });
@@ -61,8 +62,11 @@ function NavTop({ backButton, title }) {
       <AppBar position="sticky">
         <Toolbar className={classes.toolBar}>
           {
-                        backButton === true && <BackButton />
-                    }
+            refreshButton && <IconButton color="secondary" onClick={onRefresh}><LoopIcon/></IconButton>
+          }
+          {
+            backButton && <BackButton />
+          }
           <Typography variant="h6" color="inherit">
             {title}
           </Typography>

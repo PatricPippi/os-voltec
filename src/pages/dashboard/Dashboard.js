@@ -26,7 +26,6 @@ function Dashboard({ classes }) {
 
 
   const loadOrders = useCallback(async () => {
-    console.log('chamado');
     setLoading(true);
     try {
       const response = await api.get('orders', {
@@ -43,7 +42,6 @@ function Dashboard({ classes }) {
       setOrders(response.data);
       setLoading(false);
     } catch (error) {
-      console.error(error);
       setLoading(false);
     }
   }, [isAdmin, status, token, userId]);
@@ -69,17 +67,17 @@ function Dashboard({ classes }) {
         type={order.type}
         serviceOrder={order.serviceOrder}
         clientName={order.clientName}
-        userName={'Patric'}
+        userName={order.name}
         description={order.service}
         id={order.id}
-        date={`${order.serviceDate.split(' ')[0]} ás ${order.serviceTime}`}
+        date={`${order.serviceDate.split(' ')[0]} às ${order.serviceTime === null ? "Sem Horário" : order.serviceTime}`}
       />
     </li>
   ));
 
   return (
     <>
-      <NavTop title="Ordens de serviço" />
+      <NavTop title="Ordens de serviço" refreshButton onRefresh={loadOrders} />
       <Container className={classes.container}>
         <Grid>
           <List>

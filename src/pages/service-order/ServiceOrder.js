@@ -234,10 +234,12 @@ function ServiceOrder() {
         <div className="card-header">
           <Typography variant>
             Pedido:
+            {' '}
             {order.order}
           </Typography>
           <Typography>
             OS:
+            {' '}
             {order.serviceOrder}
           </Typography>
         </div>
