@@ -1,37 +1,42 @@
 /* eslint-disable no-console */
 /* eslint-disable react/prop-types */
 /* eslint-disable react/jsx-filename-extension */
+import { Button, TextField } from '@material-ui/core';
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
+import NavTop from '../../components/nav-top/NavTop';
 
-import StepComplete from '../../components/steps/StepComplete';
-import StepPercentage from '../../components/steps/StepPercentage';
-import StepService from '../../components/steps/StepService';
-import StepEnd from '../../components/steps/StepEnd';
-
-import '../../components/steps/Steps.css';
+import './EndOrder.css';
 import api from '../../services/api';
 
 
-const EndOrder = ({ time }) => {
+function EndOrder() {
   const { id } = useParams();
   const token = localStorage.getItem('token');
 
-  const [currentStep, setCurrentStep] = useState(1);
-  const [percentage, setPercentage] = useState('');
   const [serviceCompleted, setServiceCompleted] = useState('');
   const [observation, setObservation] = useState('');
 
-  async function endOrder() {
+  const [finalKm, setFinalKm] = useState('');
+
+  const [entryMom, setEntryMom] = useState('');
+  const [exitMom, setExitMom] = useState('');
+  const [entryAfternoon, setEntryAfternoon] = useState('');
+  const [exitAfternoon, setExitAfternoon] = useState('');
+
+  const history = useHistory();
+
+  async function completeOrder() {
     const endData = {
       serviceCompleted,
       observation,
-      time,
-      percentage,
+      finalKm,
+      entryMom,
+      exitMom,
+      entryAfternoon,
+      exitAfternoon,
       status: 'complete',
     };
-
-    console.log(endData);
 
     try {
       await api.put(`order/${id}`, endData, {
@@ -40,55 +45,104 @@ const EndOrder = ({ time }) => {
         },
       });
     } catch (error) {
-      console.log(error);
+      return console.error(error);
     }
+
+    return history.goBack();
   }
-
-  const handleNext = (step) => {
-    if (step !== 'percentageStep') {
-      setCurrentStep(currentStep >= 2 ? 3 : currentStep + 1);
-    } else {
-      setCurrentStep('percentageStep');
-    }
-  };
-
-  const handlePrev = () => {
-    setCurrentStep(currentStep <= 1 ? 1 : currentStep - 1);
-  };
 
 
   return (
-    <div>
-      <StepComplete
-        currentStep={currentStep}
-        next={handleNext}
-        prev={() => handleNext('percentageStep')}
-      />
-      <StepPercentage
-        currentStep={currentStep}
-        next={handleNext}
-        value={percentage}
-        onChange={(e) => setPercentage(e.target.value)}
-      />
+    <>
+      <NavTop backButton />
+      <div className="container">
+        <div className="form-container">
+          <h1>Finalizar a ordem</h1>
+          <TextField
+            fullWidth
+            label="Quilometragem Final"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={finalKm}
+            onChange={(e) => setFinalKm(e.target.value)}
+            type="number"
+          />
+          <TextField
+            fullWidth
+            label="Hora Entrada Manhã"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={entryMom}
+            onChange={(e) => setEntryMom(e.target.value)}
+            type="time"
+          />
+          <TextField
+            fullWidth
+            label="Hora Saída Manhã"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={exitMom}
+            onChange={(e) => setExitMom(e.target.value)}
+            type="time"
+          />
+          <TextField
+            label="Hora Entrada Tarde"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={entryAfternoon}
+            onChange={(e) => setEntryAfternoon(e.target.value)}
+            type="time"
+            fullWidth
+          />
+          <TextField
+            label="Hora Saída Tarde"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={exitAfternoon}
+            onChange={(e) => setExitAfternoon(e.target.value)}
+            type="time"
+            fullWidth
+          />
+          <TextField
+            label="Serviço Realizado"
+            value={serviceCompleted}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            onChange={(e) => setServiceCompleted(e.target.value)}
+            type="text"
+            fullWidth
+            multiline
+          />
+          <TextField
+            label="Observação"
+            value={observation}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            onChange={(e) => setObservation(e.target.value)}
+            type="text"
+            fullWidth
+            multiline
+          />
 
-      <StepService
-        currentStep={currentStep}
-        next={handleNext}
-        prev={handlePrev}
-        value={serviceCompleted}
-        onChange={(e) => setServiceCompleted(e.target.value)}
-      />
-
-      <StepEnd
-        currentStep={currentStep}
-        next={handleNext}
-        prev={handlePrev}
-        value={observation}
-        onChange={(e) => setObservation(e.target.value)}
-        onClick={endOrder}
-      />
-    </div>
+          <Button
+            variant="contained"
+            disableElevation
+            color="secondary"
+            onClick={() => completeOrder()}
+          >
+            Finalizar Ordem
+          </Button>
+        </div>
+      </div>
+    </>
   );
-};
+}
 
 export default EndOrder;

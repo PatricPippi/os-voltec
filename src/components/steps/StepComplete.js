@@ -1,11 +1,7 @@
-import React from 'react'
+import React from 'react';
 import { Dialog, DialogTitle, Button } from '@material-ui/core';
 
-
-
 const StepComplete = (props) => {
-
-
 
     if (props.currentStep !== 1) {
         return null

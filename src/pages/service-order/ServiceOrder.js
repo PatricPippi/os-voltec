@@ -1,82 +1,63 @@
+/* eslint-disable no-use-before-define */
+/* eslint-disable no-shadow */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable react/jsx-filename-extension */
 /* eslint-disable no-console */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Typography,
   Paper,
   makeStyles,
-  ExpansionPanel,
-  ExpansionPanelSummary,
-  ExpansionPanelDetails,
-  List,
   Button,
+  Dialog,
+  DialogTitle,
+  TextField,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  DialogContent,
+  DialogActions,
 } from '@material-ui/core';
-import { useStopwatch } from 'react-timer-hook';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import './ServiceOrder.css';
-import { Link, useParams } from 'react-router-dom';
-import Moment from 'react-moment';
+import { Link, useHistory, useParams } from 'react-router-dom';
 import 'moment/locale/pt-br';
-import ScrollView from '../../components/scroll-view/ScrollView';
-import EndOrder from '../end-order/EndOrder';
 import NavTop from '../../components/nav-top/NavTop';
 import api from '../../services/api';
 
 function ServiceOrder() {
-  const {
-    seconds,
-    minutes,
-    hours,
-    start,
-    pause,
-  } = useStopwatch();
-
-
   const [users, setUsers] = useState([]);
   const [cars, setCars] = useState([]);
+  const [driverCar, setDriverCar] = useState('');
   const [starts, setStarts] = useState(false);
-  const [paused, setPaused] = useState(false);
-  const [open, setOpen] = useState(false);
   const [order, setOrder] = useState([]);
-  const [resume, setResume] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [isDriver, setIsDriver] = useState(false);
+  const [initialKm, setInitialKm] = useState();
   const [button, setButton] = useState({
     color: 'primary',
     text: 'Iniciar',
   });
-  const [timer, setTimer] = useState({
-    timeSeconds: '00',
-    timeMinutes: '00',
-    timeHours: '00',
-  });
-
-
-  useEffect(() => {
-    setTimer({
-      timeSeconds: `0${seconds}`.slice(-2),
-      timeMinutes: `0${minutes}`.slice(-2),
-      timeHours: `0${hours}`.slice(-2),
-    });
-  }, [hours, minutes, seconds]);
 
   const { id } = useParams();
 
   const userId = localStorage.getItem('userId');
 
-
   const token = localStorage.getItem('token');
 
-  async function createResume(type) {
+  const history = useHistory();
+
+  async function initOrder() {
     const data = {
-      userId,
       orderId: id,
-      type,
-      start: starts,
+      isDriver,
+      initialKm,
+      driverCar,
+      start: true,
     };
 
-
     try {
-      await api.post('resume', data, {
+      await api.put('init', data, {
         headers: {
           'x-access-token': token,
         },
@@ -86,14 +67,6 @@ function ServiceOrder() {
     }
   }
 
-  async function getResumes() {
-    const resumes = await api.get(`resume/${id}`, {
-      headers: {
-        'x-access-token': token,
-      },
-    });
-    setResume(resumes.data);
-  }
 
   useEffect(() => {
     async function orderData() {
@@ -105,15 +78,12 @@ function ServiceOrder() {
         });
         setOrder(response.data);
 
-        console.log(response.data);
-
         if (response.data.status === 'inprogress') {
           setStarts(true);
           setButton({
             color: 'secondary',
             text: 'Finalizar',
           });
-          setPaused(true);
         }
       } catch (error) {
         console.log(error);
@@ -131,24 +101,24 @@ function ServiceOrder() {
           },
         });
         setUsers(response.data);
-        console.log(response);
       } catch (error) {
         console.error(error);
       }
     }
 
     async function loadCars() {
-      try {
-        const response = await api.get(`cars/${order.serviceOrder}/${userId}`, {
-          headers: {
-            'x-access-token': token,
-          },
-        });
+      if (order.serviceOrder) {
+        try {
+          const response = await api.get(`cars/${order.serviceOrder}`, {
+            headers: {
+              'x-access-token': token,
+            },
+          });
 
-        setCars(response.data);
-        console.log(response);
-      } catch (error) {
-        console.log(error);
+          setCars(response.data);
+        } catch (error) {
+          console.log(error);
+        }
       }
     }
     if (order) {
@@ -157,21 +127,7 @@ function ServiceOrder() {
     }
   }, [order, order.serviceOrder, token, userId]);
 
-  function handlePause() {
-    if (paused === false) {
-      createResume(2);
-      setPaused(true);
-      getResumes();
-      pause();
-    } else {
-      createResume(1);
-      setPaused(false);
-      getResumes();
-      start();
-    }
-  }
 
-  // eslint-disable-next-line no-use-before-define
   const classes = styles();
 
   const listCars = cars.map((car) => (
@@ -185,32 +141,22 @@ function ServiceOrder() {
   ));
 
 
-  const listResume = resume.map((resum) => (
-    <Typography key={resum.id}>
-      {resum.type === 1 ? 'Entrada' : 'Saída'}
-      {' '}
-      -
-      {' '}
-      <Moment format="LLL" locale="pt-br">{resum.created_at}</Moment>
-    </Typography>
-  ));
-
-  const endOrder = useCallback(() => {
-    setOpen(true);
-  }, []);
-
   function handleStart() {
+    setOpen(!open);
+
     if (!starts) {
-      setStarts(true);
-      setPaused(false);
       setButton({
         color: 'secondary',
         text: 'Finalizar',
       });
-      start();
-      createResume(1);
-    } else {
-      endOrder();
+      setStarts(true);
+      initOrder();
+    }
+  }
+
+  function handleFinalize() {
+    if (starts) {
+      history.push(`/finalizar/${id}`);
     }
   }
 
@@ -234,12 +180,10 @@ function ServiceOrder() {
         <div className="card-header">
           <Typography variant>
             Pedido:
-            {' '}
             {order.order}
           </Typography>
           <Typography>
             OS:
-            {' '}
             {order.serviceOrder}
           </Typography>
         </div>
@@ -266,43 +210,6 @@ function ServiceOrder() {
       </Paper>
       <div className="content-header" />
       <div className="content">
-        { starts === true
-                    && (
-                    <>
-                      <div className="status-header">
-                        <Typography>
-                          {timer.timeHours}
-                          :
-                          {timer.timeMinutes}
-                          :
-                          {timer.timeSeconds}
-                        </Typography>
-                      </div>
-                      <div className="status-button">
-                        {
-                                paused !== true
-                                  ? (
-                                    <Button
-                                      variant="outlined"
-                                      color="secondary"
-                                      onClick={() => handlePause()}
-                                    >
-                                      Parar
-                                    </Button>
-                                  )
-                                  : (
-                                    <Button
-                                      variant="outlined"
-                                      color="primary"
-                                      onClick={() => handlePause()}
-                                    >
-                                      Voltar
-                                    </Button>
-                                  )
-                            }
-                      </div>
-                    </>
-                    )}
         <Typography variant="h6">Serviço Solicitado:</Typography>
         <Typography variant="subtitle1" className={classes.margin}>{order.service}</Typography>
         <Typography variant="h6">Descrição:</Typography>
@@ -315,23 +222,6 @@ function ServiceOrder() {
             <Typography variant="subtitle1" key={i}>{ user ? user.name : '' }</Typography>
           ))
         }
-        <ExpansionPanel>
-          <ExpansionPanelSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel1a-content"
-            id="panel1a-header"
-            onClick={getResumes}
-          >
-            <Typography>Resumo</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails>
-            <List>
-              <ScrollView height="20" paddin g="1">
-                {listResume}
-              </ScrollView>
-            </List>
-          </ExpansionPanelDetails>
-        </ExpansionPanel>
         <div className="footer">
           {
           order.status === 'complete' ? (
@@ -340,24 +230,13 @@ function ServiceOrder() {
               <Typography variant="subtitle1" className={classes.margin}>{order.serviceCompleted}</Typography>
               <Typography variant="h6">Observação:</Typography>
               <Typography variant="subtitle1" className={classes.margin}>{order.observation}</Typography>
-              <Typography variant="h6">Tempo / Deslocamento</Typography>
-              <Typography variant="subtitle1" className={classes.margin}>
-                Tempo:
-                {' '}
-                {order.time}
-                , Deslocamento:
-                {' '}
-                {order.distance}
-                km
-              </Typography>
             </>
           ) : (
             <>
               <Button
-                disabled={!paused && starts}
                 disableElevation
                 variant="contained"
-                onClick={handleStart}
+                onClick={() => { if (starts) handleFinalize(); else setOpen(!open); }}
                 className={classes.margin}
                 color={button.color}
                 size="large"
@@ -371,15 +250,82 @@ function ServiceOrder() {
               >
                 <Link to="/solicitar" className="links">Soliciar Material</Link>
               </Button>
-              {
-                open === true
-                && <EndOrder time={`${timer.timeHours}:${timer.timeMinutes}:${timer.timeSeconds}`} />
-              }
             </>
           )
           }
         </div>
       </div>
+      <Dialog open={open}>
+        <div className="step-container">
+          <DialogTitle>Você é motorista ?</DialogTitle>
+          <div className="step-buttons">
+            <Button
+              variant="contained"
+              className="step-button"
+              color="secondary"
+              disableElevation
+              onClick={() => {
+                setIsDriver(false);
+                handleStart();
+              }}
+            >
+              Não
+            </Button>
+            <Button
+              variant="contained"
+              className="step-button"
+              color="primary"
+              disableElevation
+              onClick={() => setIsDriver(true)}
+            >
+              Sim
+            </Button>
+          </div>
+          <DialogContent open={open} className={isDriver ? classes.enable : classes.disable}>
+            <TextField
+              label="Quilometragem Inicial"
+              type="number"
+              name="service"
+              value={initialKm}
+              onChange={(e) => setInitialKm(e.target.value)}
+              fullWidth
+            />
+            <FormControl className={classes.formControl}>
+              <InputLabel id="demo-controlled-open-select-label">Veículo</InputLabel>
+
+              <Select
+                labelId="demo-controlled-open-select-label"
+                value={driverCar}
+                onChange={(e) => setDriverCar(e.target.value)}
+                fullWidth
+              >
+                {
+                  cars.map((carSelect) => (
+                    <MenuItem value={carSelect.carNumber}>
+                      {carSelect.carName}
+                      {' '}
+                      -
+                      {' '}
+                      {carSelect.carNumber}
+                    </MenuItem>
+                  ))
+                }
+              </Select>
+            </FormControl>
+            <DialogActions>
+              <Button
+                variant="contained"
+                disableElevation
+                color="primary"
+                onClick={() => handleStart()}
+              >
+                Iniciar Ordem
+              </Button>
+            </DialogActions>
+          </DialogContent>
+        </div>
+
+      </Dialog>
     </>
   );
 }
@@ -394,6 +340,17 @@ const styles = makeStyles({
   },
   margin: {
     marginBottom: '1.2rem',
+  },
+  formControl: {
+    margin: 10,
+    minWidth: 120,
+    width: '60%',
+  },
+  disable: {
+    display: 'none',
+  },
+  enable: {
+    display: 'block',
   },
 });
 

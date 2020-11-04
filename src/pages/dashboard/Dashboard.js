@@ -70,7 +70,7 @@ function Dashboard({ classes }) {
         userName={order.name}
         description={order.service}
         id={order.id}
-        date={`${order.serviceDate.split(' ')[0]} às ${order.serviceTime === null ? "Sem Horário" : order.serviceTime}`}
+        date={`${order.serviceDate.split(' ')[0]} às ${order.serviceTime === null ? 'Sem Horário' : order.serviceTime}`}
       />
     </li>
   ));

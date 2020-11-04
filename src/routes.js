@@ -11,6 +11,7 @@ import ServiceOrder from './pages/service-order/ServiceOrder';
 import Material from './pages/material/Material';
 import PrivateRoute from './components/routes/PrivateRoute';
 import Schedule from './pages/schedule/Schedule';
+import EndOrder from './pages/end-order/EndOrder';
 
 export default function Routes() {
   return (
@@ -23,6 +24,7 @@ export default function Routes() {
         <PrivateRoute path="/order/:id" component={ServiceOrder} />
         <PrivateRoute path="/solicitar" component={Material} />
         <PrivateRoute path="/schedule" component={Schedule} />
+        <PrivateRoute path="/finalizar/:id" component={EndOrder} />
       </Switch>
     </Router>
   );
